@@ -18,7 +18,7 @@ public class SingleMatrix {
     //penampung
     private static int matC[] = new int[N * N];
 
-    private static int porsi;
+    private static int porsi; //pembagian task
 
     public static void main(String[] args) {
         MPI.Init(args); //inisialisasi openMP
@@ -41,9 +41,9 @@ public class SingleMatrix {
 
         porsi = N / size;
 
-        int[] matAi = new int[porsi * N];
-        int[] matBi = new int[N * N];
-        int[] matCi = new int[porsi * N];
+        int[] matAi = new int[porsi * N]; //penampung matA / 2
+        int[] matBi = new int[N * N]; //penampung matB / 2
+        int[] matCi = new int[porsi * N]; //penampung matC / 2
 
         //mengirim matriks A dari mainProcess(main) ke otherProcess (slave)
         if (rank == 0) {
@@ -52,11 +52,12 @@ public class SingleMatrix {
                     matAi[i * N + j] = matA[i * N + j];
                 }
             }
-            printMatrix("A baru", matA);
+            //kirim :D
             for (int i=1; i < size; i++) {
                 MPI.COMM_WORLD.Send(matA, i * porsi * N, porsi * N, MPI.INT, i, i);
             }
         } else {
+            //kalau misal rank nya bukan master, di terima
             MPI.COMM_WORLD.Recv(matAi, 0, porsi * N, MPI.INT, 0, rank);
         }
 
@@ -67,10 +68,12 @@ public class SingleMatrix {
                     matBi[i * N + j] = matB[i * N + j];
                 }
             }
+            //kirim :D
             for (int i=1; i < size; i++) {
                 MPI.COMM_WORLD.Send(matB, 0, N * N, MPI.INT, i, i);
             }
         } else {
+            //kalau misal rank nya bukan master, di terima
             MPI.COMM_WORLD.Recv(matBi, 0, N * N, MPI.INT, 0, rank);
         }
 
@@ -80,7 +83,11 @@ public class SingleMatrix {
                 matCi[i * N + j] = 0;
                 for (int k=0; k < N; k++) {
                     matCi[i * N + j] += matAi[i * N + k] * matBi[k * N + j];
+                    //memastikan saja :))
+                    //System.out.println("A =>" + matAi[i * N + k] + " B =>" + matBi[k * N + j]);
+                    //System.out.print("HASIL A*B => " + matCi[i * N + j]);
                 }
+                //System.out.println();
             }
         }
 
