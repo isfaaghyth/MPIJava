@@ -5,7 +5,7 @@ import mpi.*;
  */
 public class Convert {
 
-    public void convertRes(String[] args) {
+    public static void main(String[] args) {
         MPI.Init(args);
         int myRank = MPI.COMM_WORLD.Rank();
         if(myRank == 0) {
