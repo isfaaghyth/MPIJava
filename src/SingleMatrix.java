@@ -4,9 +4,9 @@ import java.util.Random;
 
 /**
  * Single Matrix with openMP
- * @porting isfaaghyth
- * @reference: https://github.com/JING-TIME/C-Programming/blob/master/141029/MatrixMul.c
- * @reference: https://gist.github.com/morris821028/1ee07f52d494217ae26933d352c7f07f
+ * @porting isfaaghyth (JVM)
+ * @reference: https://github.com/JING-TIME/C-Programming/blob/master/141029/MatrixMul.c (C)
+ * @reference: https://gist.github.com/morris821028/1ee07f52d494217ae26933d352c7f07f (OpenCL)
  */
 public class SingleMatrix {
 
@@ -59,6 +59,10 @@ public class SingleMatrix {
         } else {
             //kalau misal rank nya bukan master, di terima
             MPI.COMM_WORLD.Recv(matAi, 0, porsi * N, MPI.INT, 0, rank);
+            System.out.println("A penampung (recv):");
+            for (int i = 0; i < matAi.length; i++) {
+                System.out.print(matAi[i]+" ");
+            }
         }
 
         //mengirim matriks B dari mainProcess(main) ke otherProcess (slave)
@@ -75,6 +79,8 @@ public class SingleMatrix {
         } else {
             //kalau misal rank nya bukan master, di terima
             MPI.COMM_WORLD.Recv(matBi, 0, N * N, MPI.INT, 0, rank);
+            System.out.println();
+            printMatrix("B (recv)", matBi);
         }
 
         //kalkulasi !
@@ -94,6 +100,10 @@ public class SingleMatrix {
         //kirim hasil dari otherProcess(slave) ke mainProcess(master)
         if (rank != 0) {
             MPI.COMM_WORLD.Send(matCi, 0, porsi * N, MPI.INT, 0, rank);
+            System.out.println("C (recv):");
+            for (int j = 0; j < matCi.length; j++) {
+                System.out.print(matCi[j]+" ");
+            }
         } else {
             for (int i=0; i < porsi; i++) {
                 for (int j=0; j < N; j++) {
@@ -102,6 +112,7 @@ public class SingleMatrix {
             }
             for (int i=1; i < size; i++) {
                 MPI.COMM_WORLD.Recv(matC, i * porsi * N, porsi * N, MPI.INT, i, i);
+                printMatrix("C", matC);
             }
         }
 
